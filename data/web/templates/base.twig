@@ -513,7 +513,7 @@ function recursiveBase64StrToArrayBuffer(obj) {
         signature : cred.response.signature ? arrayBufferToBase64(cred.response.signature) : null
       };
     }).then(JSON.stringify).then(function(AuthenticatorAttestationResponse) {
-      var formData = new FormData();
+      var formData = new URLSearchParams();
       formData.append("token", AuthenticatorAttestationResponse);
       formData.append("verify_fido2_login", "true");
 
