@@ -47,6 +47,12 @@ http {
         default "";
     }
 
+    # CVE-2026-109618 stopgap: PHP parses multipart before any app code runs
+    map $content_type $php_multipart {
+        default         0;
+        "~*multipart/"  1;
+    }
+
     {% if HTTP_REDIRECT %}
     # HTTP to HTTPS redirect
     server {
@@ -67,6 +73,8 @@ http {
             allow all;
             fastcgi_split_path_info ^(.+\.php)(/.+)$;
             fastcgi_pass {{ PHPFPMHOST }}:9002;
+            client_max_body_size 8m;
+            if ($php_multipart) { return 415; }
             include /etc/nginx/fastcgi_params;
             fastcgi_param SCRIPT_FILENAME $document_root/mta-sts.php;
             fastcgi_param PATH_INFO $fastcgi_path_info;

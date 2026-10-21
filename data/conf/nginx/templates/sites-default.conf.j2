@@ -79,6 +79,8 @@ location ^~ /.well-known/mta-sts.txt {
     allow all;
     fastcgi_split_path_info ^(.+\.php)(/.+)$;
     fastcgi_pass {{ PHPFPMHOST }}:9002;
+    client_max_body_size 8m;
+    if ($php_multipart) { return 415; }
     include /etc/nginx/fastcgi_params;
     fastcgi_param SCRIPT_FILENAME $document_root/mta-sts.php;
     fastcgi_param PATH_INFO $fastcgi_path_info;
@@ -112,6 +114,8 @@ location ~ \.php$ {
     try_files $uri =404;
     fastcgi_split_path_info ^(.+\.php)(/.+)$;
     fastcgi_pass {{ PHPFPMHOST }}:9002;
+    client_max_body_size 8m;
+    if ($php_multipart) { return 415; }
     fastcgi_index index.php;
     include /etc/nginx/fastcgi_params;
     fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
@@ -126,6 +130,8 @@ location ~ \.php$ {
 location ~* ^/Autodiscover/Autodiscover.xml {
     fastcgi_split_path_info ^(.+\.php)(/.+)$;
     fastcgi_pass {{ PHPFPMHOST }}:9002;
+    client_max_body_size 8m;
+    if ($php_multipart) { return 415; }
     include /etc/nginx/fastcgi_params;
     fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     try_files /autodiscover.php =404;
@@ -134,6 +140,8 @@ location ~* ^/Autodiscover/Autodiscover.xml {
 location ~* ^/Autodiscover/Autodiscover.json {
     fastcgi_split_path_info ^(.+\.php)(/.+)$;
     fastcgi_pass {{ PHPFPMHOST }}:9002;
+    client_max_body_size 8m;
+    if ($php_multipart) { return 415; }
     include /etc/nginx/fastcgi_params;
     fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     try_files /autodiscover-json.php =404;
@@ -142,6 +150,8 @@ location ~* ^/Autodiscover/Autodiscover.json {
 location ~ /(?:m|M)ail/(?:c|C)onfig-v1.1.xml {
     fastcgi_split_path_info ^(.+\.php)(/.+)$;
     fastcgi_pass {{ PHPFPMHOST }}:9002;
+    client_max_body_size 8m;
+    if ($php_multipart) { return 415; }
     include /etc/nginx/fastcgi_params;
     fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     try_files /autoconfig.php =404;
@@ -179,6 +189,8 @@ location /sogo-auth-verify {
     proxy_set_header  X-Real-IP $remote_addr;
     proxy_set_header  Host $http_host;
     proxy_set_header  Content-Length "";
+    # body is not passed, so don't trip the multipart block on uploads
+    proxy_set_header  Content-Type "";
     proxy_pass        http://127.0.0.1:65510/sogo-auth;
     proxy_pass_request_body off;
 }
